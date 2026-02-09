@@ -6,7 +6,7 @@ from .parser import parse_junit_xml, parse_junit_xml_string
 from .generator import generate_html, get_available_templates
 from pathlib import Path
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __all__ = ["parse_junit_xml", "parse_junit_xml_string", "generate_html", "get_available_templates", "create_report"]
 
 
