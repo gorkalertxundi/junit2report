@@ -55,7 +55,7 @@ This generates both `output.html` (main report) and `output-analytics.html` (ana
 You can integrate the generator directly into your Python scripts.
 
 ```python
-from junit_report_generator import create_report
+from junit2report import create_report
 
 # Convert with a specific template
 create_report(

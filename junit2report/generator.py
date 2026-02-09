@@ -15,7 +15,7 @@ def get_available_templates() -> List[str]:
         List of template names (without .html extension)
     """
     env = Environment(
-        loader=PackageLoader("junit_html_report_generator", "templates"),
+        loader=PackageLoader("junit2report", "templates"),
         autoescape=select_autoescape(["html", "xml"])
     )
     
@@ -40,7 +40,7 @@ def generate_html(report_data: Dict[str, Any], template_name: str = "modern", ti
     """
     # Set up Jinja2 environment with PackageLoader to load templates from the package
     env = Environment(
-        loader=PackageLoader("junit_html_report_generator", "templates"),
+        loader=PackageLoader("junit2report", "templates"),
         autoescape=select_autoescape(["html", "xml"])
     )
     
