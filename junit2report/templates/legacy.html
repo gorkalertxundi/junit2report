@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results - Legacy</title>
+    <style>
+        body {
+            font-family: Verdana, Arial, sans-serif;
+            font-size: 11px;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+        
+        .header {
+            background: #4a90e2;
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+        
+        .summary {
+            background: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .summary-content {
+            flex: 1;
+        }
+        
+        .summary h2 {
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .summary table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .summary td {
+            padding: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .summary td:first-child {
+            font-weight: bold;
+            background: #f5f5f5;
+            width: 150px;
+        }
+        
+        .passed-count {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        .failed-count {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .chart-container {
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chart-container h3 {
+            font-size: 12px;
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .tests-table {
+            background: white;
+            border: 1px solid #ccc;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .tests-table th {
+            background: #4a90e2;
+            color: white;
+            text-align: left;
+            padding: 8px;
+            font-weight: bold;
+            border: 1px solid #357ab8;
+        }
+        
+        .tests-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .tests-table tr.passed {
+            background: #dff0d8;
+        }
+        
+        .tests-table tr.failed,
+        .tests-table tr.error {
+            background: #f2dede;
+        }
+        
+        .tests-table tr.skipped {
+            background: #fcf8e3;
+        }
+        
+        .status-icon {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .status-passed {
+            color: #4caf50;
+        }
+        
+        .status-failed,
+        .status-error {
+            color: #f44336;
+        }
+        
+        .status-skipped {
+            color: #ff9800;
+        }
+        
+        .error-details {
+            margin-top: 5px;
+            padding: 8px;
+            background: #fff;
+            border: 1px solid #f44336;
+            font-family: monospace;
+            font-size: 10px;
+            white-space: pre-wrap;
+        }
+        
+        .output-details {
+            margin-top: 5px;
+            padding: 8px;
+            background: #f9f9f9;
+            border: 1px solid #bbb;
+            font-family: monospace;
+            font-size: 10px;
+            white-space: pre-wrap;
+            max-height: 150px;
+            overflow: auto;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            padding: 5px 8px;
+            border: 1px solid #bbb;
+            border-radius: 3px;
+            font-size: 11px;
+            width: 250px;
+            transition: border-color 0.2s;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+        }
+        
+        .test-class {
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .class-header {
+            background: #4a90e2;
+            color: white;
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            user-select: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        
+        .class-header:hover {
+            background: #357ab8;
+        }
+        
+        .toggle-icon {
+            display: inline-block;
+            margin-right: 10px;
+            transition: transform 0.2s;
+            font-size: 11px;
+        }
+        
+        .class-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .class-summary {
+            margin-left: auto;
+            font-size: 10px;
+            opacity: 0.9;
+            font-weight: normal;
+        }
+        
+        .class-status-bar {
+            display: flex;
+            gap: 0;
+            height: 5px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-left: 15px;
+            min-width: 80px;
+            background: #ddd;
+        }
+        
+        .status-segment {
+            flex: 0;
+            transition: flex 0.3s ease;
+        }
+        
+        .status-segment.passed {
+            background: #4caf50;
+        }
+        
+        .status-segment.failed {
+            background: #f44336;
+        }
+        
+        .status-segment.error {
+            background: #ff9800;
+        }
+        
+        .status-segment.skipped {
+            background: #9e9e9e;
+        }
+        
+        .class-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .class-table thead tr {
+            background: #e8e8e8;
+            border-bottom: 1px solid #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ title or 'Test Results Report' }}</h1>
+    </div>
+    
+    <div class="summary">
+        <div class="summary-content">
+            <h2>Summary</h2>
+            <table>
+                <tr>
+                    <td>Total Tests</td>
+                    <td>{{ summary.total }}</td>
+                </tr>
+                <tr>
+                    <td>Tests Passed</td>
+                    <td class="passed-count">{{ summary.passed }}</td>
+                </tr>
+                <tr>
+                    <td>Tests Failed</td>
+                    <td class="failed-count">{{ summary.failed }}</td>
+                </tr>
+                <tr>
+                    <td>Tests with Errors</td>
+                    <td class="failed-count">{{ summary.errors }}</td>
+                </tr>
+                <tr>
+                    <td>Tests Skipped</td>
+                    <td>{{ summary.skipped }}</td>
+                </tr>
+                <tr>
+                    <td>Success Rate</td>
+                    <td><strong>{{ summary.pass_rate }}%</strong></td>
+                </tr>
+                <tr>
+                    <td>Total Time</td>
+                    <td>{{ summary.time }} seconds</td>
+                </tr>
+            </table>
+        </div>
+        <div class="chart-container">
+            <h3>Test Results</h3>
+            <canvas id="resultsChart" width="200" height="200"></canvas>
+        </div>
+    </div>
+    
+    <script>
+        // Simple pie chart drawing function
+        function drawPieChart(canvasId, data) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) - 10;
+            
+            const total = data.reduce((sum, item) => sum + item.value, 0);
+            let currentAngle = -Math.PI / 2;
+            
+            // Draw pie slices
+            data.forEach(item => {
+                if (item.value > 0) {
+                    const sliceAngle = (item.value / total) * 2 * Math.PI;
+                    
+                    ctx.beginPath();
+                    ctx.fillStyle = item.color;
+                    ctx.moveTo(centerX, centerY);
+                    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Draw border
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Draw percentage label on slice
+                    const percentage = ((item.value / total) * 100).toFixed(1);
+                    if (parseFloat(percentage) > 5) { // Only show if slice is large enough
+                        const labelAngle = currentAngle + sliceAngle / 2;
+                        const labelRadius = radius * 0.7;
+                        const labelX = centerX + Math.cos(labelAngle) * labelRadius;
+                        const labelY = centerY + Math.sin(labelAngle) * labelRadius;
+                        
+                        ctx.fillStyle = '#fff';
+                        ctx.font = 'bold 12px Verdana';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        
+                        // Add text shadow for better readability
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                        ctx.shadowBlur = 3;
+                        ctx.shadowOffsetX = 1;
+                        ctx.shadowOffsetY = 1;
+                        
+                        ctx.fillText(percentage + '%', labelX, labelY);
+                        
+                        // Reset shadow
+                        ctx.shadowColor = 'transparent';
+                        ctx.shadowBlur = 0;
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = 0;
+                    }
+                    
+                    currentAngle += sliceAngle;
+                }
+            });
+            
+            // Draw legend
+            const legendX = 10;
+            let legendY = canvas.height + 10;
+            
+            data.forEach(item => {
+                if (item.value > 0) {
+                    const percentage = ((item.value / total) * 100).toFixed(1);
+                    
+                    // Draw color box
+                    ctx.fillStyle = item.color;
+                    ctx.fillRect(legendX, legendY, 12, 12);
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(legendX, legendY, 12, 12);
+                    
+                    // Draw label
+                    ctx.fillStyle = '#333';
+                    ctx.font = '11px Verdana';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`${item.label}: ${item.value} (${percentage}%)`, legendX + 18, legendY + 10);
+                    
+                    legendY += 20;
+                }
+            });
+        }
+        
+        // Draw the chart
+        drawPieChart('resultsChart', [
+            { label: 'Passed', value: {{ summary.passed }}, color: '#4caf50' },
+            { label: 'Failed', value: {{ summary.failed }}, color: '#f44336' },
+            { label: 'Errors', value: {{ summary.errors }}, color: '#ff5722' },
+            { label: 'Skipped', value: {{ summary.skipped }}, color: '#ff9800' }
+        ]);
+    </script>
+    
+    <div class="filters">
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterTests('all')">All ({{ summary.total }})</button>
+            <button class="filter-btn" onclick="filterTests('passed')">Passed ({{ summary.passed }})</button>
+            <button class="filter-btn" onclick="filterTests('failed')">Failed ({{ summary.failed + summary.errors }})</button>
+            <button class="filter-btn" onclick="filterTests('skipped')">Skipped ({{ summary.skipped }})</button>
+        </div>
+        <input type="text" id="searchInput" class="search-box" placeholder="Search by class or test name..." onkeyup="searchTests()">
+    </div>
+    
+    {% set classes = {} %}
+    {% for test in test_cases %}
+        {% if test.classname not in classes %}
+            {% set _ = classes.update({test.classname: []}) %}
+        {% endif %}
+        {% set _ = classes[test.classname].append(test) %}
+    {% endfor %}
+    
+    {% for classname in classes|sort %}
+    <div class="test-class">
+        <div class="class-header" onclick="toggleClass(this)">
+            <span class="toggle-icon">▼</span>
+            <strong>{{ classname }}</strong>
+            <span class="class-summary">
+                ({{ classes[classname]|length }} tests)
+            </span>
+            {% set class_tests = classes[classname] %}
+            {% set passed = class_tests|selectattr('status', 'equalto', 'passed')|list|length %}
+            {% set failed = class_tests|selectattr('status', 'equalto', 'failed')|list|length %}
+            {% set errors = class_tests|selectattr('status', 'equalto', 'error')|list|length %}
+            {% set skipped = class_tests|selectattr('status', 'equalto', 'skipped')|list|length %}
+            <div class="class-status-bar">
+                {% if passed > 0 %}<div class="status-segment passed" style="flex: {{ passed }}"></div>{% endif %}
+                {% if failed > 0 %}<div class="status-segment failed" style="flex: {{ failed }}"></div>{% endif %}
+                {% if errors > 0 %}<div class="status-segment error" style="flex: {{ errors }}"></div>{% endif %}
+                {% if skipped > 0 %}<div class="status-segment skipped" style="flex: {{ skipped }}"></div>{% endif %}
+            </div>
+        </div>
+        <table class="class-table tests-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">Status</th>
+                    <th style="width: 45%;">Test Case</th>
+                    <th style="width: 10%;">Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in classes[classname] %}
+                <tr class="{{ test.status }}" data-status="{{ test.status }}">
+                    <td style="text-align: center;">
+                        {% if test.status == 'passed' %}
+                        <span class="status-icon status-passed">✓</span>
+                        {% elif test.status == 'failed' or test.status == 'error' %}
+                        <span class="status-icon status-failed">✗</span>
+                        {% elif test.status == 'skipped' %}
+                        <span class="status-icon status-skipped">⊘</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ test.name }}</strong>
+                        {% if test.message %}
+                        <div class="error-details">
+                            <strong>Error:</strong> {{ test.message }}
+                        </div>
+                        {% endif %}
+                        {% if test.output %}
+                        <div class="output-details">{{ test.output }}</div>
+                        {% endif %}
+                    </td>
+                    <td>{{ test.time }}s</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+    
+    <div class="footer">
+        Report generated by <a href="https://github.com/gorkalertxundi/junit-report-generator" target="_blank" style="color: #4a90e2; text-decoration: none;">JUnit Report Generator</a>
+    </div>
+    
+    <script>
+        let currentStatusFilter = 'all';
+        
+        function toggleClass(headerElement) {
+            const classDiv = headerElement.closest('.test-class');
+            const table = classDiv.querySelector('.class-table');
+            
+            headerElement.classList.toggle('collapsed');
+            table.style.display = headerElement.classList.contains('collapsed') ? 'none' : '';
+        }
+        
+        function searchTests() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const classGroups = document.querySelectorAll('.test-class');
+            
+            classGroups.forEach(classDiv => {
+                const classHeader = classDiv.querySelector('.class-header strong');
+                const className = classHeader.textContent.toLowerCase();
+                const rows = classDiv.querySelectorAll('.class-table tbody tr');
+                let visibleCount = 0;
+                
+                rows.forEach(row => {
+                    const testName = row.querySelector('strong').textContent.toLowerCase();
+                    const matchesSearch = className.includes(searchInput) || testName.includes(searchInput);
+                    
+                    if (currentStatusFilter === 'all') {
+                        row.style.display = matchesSearch ? '' : 'none';
+                        if (matchesSearch) visibleCount++;
+                    } else if (currentStatusFilter === 'failed') {
+                        const matchesStatus = row.dataset.status === 'failed' || row.dataset.status === 'error';
+                        row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
+                        if (matchesStatus && matchesSearch) visibleCount++;
+                    } else {
+                        const matchesStatus = row.dataset.status === currentStatusFilter;
+                        row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
+                        if (matchesStatus && matchesSearch) visibleCount++;
+                    }
+                });
+                
+                classDiv.style.display = visibleCount > 0 ? '' : 'none';
+            });
+        }
+        
+        function filterTests(status) {
+            currentStatusFilter = status;
+            const classGroups = document.querySelectorAll('.test-class');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            // Update button states
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Apply both status filter and search
+            searchTests();
+        }
+    </script>
+</body>
+</html>

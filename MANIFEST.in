@@ -1,0 +1,3 @@
+include README.md
+include LICENSE
+recursive-include junit_report_generator/templates *.html

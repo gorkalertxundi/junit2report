@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid;
+        }
+        
+        .summary-card.total {
+            border-left-color: #667eea;
+        }
+        
+        .summary-card.passed {
+            border-left-color: #48bb78;
+        }
+        
+        .summary-card.failed {
+            border-left-color: #f56565;
+        }
+        
+        .summary-card.errors {
+            border-left-color: #ed8936;
+        }
+        
+        .summary-card.skipped {
+            border-left-color: #cbd5e0;
+        }
+        
+        .summary-card h3 {
+            font-size: 0.9em;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+        
+        .summary-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .summary-card .subvalue {
+            margin-top: 4px;
+            font-size: 0.9em;
+            color: #718096;
+        }
+        
+        .pass-rate {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pass-rate-bar {
+            display: flex;
+            gap: 0;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f1f1f1;
+        }
+        
+        .pass-rate-segment {
+            flex: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: flex 0.3s ease;
+            min-width: 40px;
+        }
+        
+        .pass-rate-segment.passed {
+            background: #48bb78;
+        }
+        
+        .pass-rate-segment.failed {
+            background: #f56565;
+        }
+        
+        .pass-rate-segment.error {
+            background: #ed8936;
+        }
+        
+        .pass-rate-segment.skipped {
+            background: #cbd5e0;
+        }
+        
+        .test-results {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .test-results h2 {
+            padding: 20px;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2d3748;
+        }
+        
+        .filters {
+            padding: 15px 20px;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 5px;
+            font-size: 0.9em;
+            width: 250px;
+            transition: border-color 0.2s;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid #cbd5e0;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn:hover {
+            background: #edf2f7;
+        }
+        
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #f7fafc;
+            position: sticky;
+            top: 0;
+        }
+        
+        th {
+            text-align: left;
+            padding: 15px 20px;
+            font-weight: 600;
+            color: #4a5568;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        
+        tr.passed {
+            background: #f0fff4;
+        }
+        
+        tr.failed, tr.error {
+            background: #fff5f5;
+        }
+        
+        tr.skipped {
+            background: #f7fafc;
+            opacity: 0.7;
+        }
+        
+        tr:hover {
+            background: #edf2f7 !important;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-badge.passed {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status-badge.failed, .status-badge.error {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .status-badge.skipped {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .error-message {
+            margin-top: 8px;
+            padding: 10px;
+            background: #fff5f5;
+            border-left: 3px solid #f56565;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #742a2a;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .test-output {
+            margin-top: 8px;
+            padding: 10px;
+            background: #f7fafc;
+            border-left: 3px solid #4299e1;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #2d3748;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .time {
+            color: #718096;
+            font-size: 0.9em;
+        }
+        
+        .test-class {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .class-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        
+        .class-header:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a3f93 100%);
+        }
+        
+        .toggle-icon {
+            display: inline-block;
+            margin-right: 10px;
+            transition: transform 0.2s;
+            font-size: 0.8em;
+        }
+        
+        .class-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .class-summary {
+            margin-left: auto;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .class-status-bar {
+            display: flex;
+            gap: 0;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-left: 15px;
+            min-width: 100px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .status-segment {
+            flex: 0;
+            transition: flex 0.3s ease;
+        }
+        
+        .status-segment.passed {
+            background: #48bb78;
+        }
+        
+        .status-segment.failed {
+            background: #f56565;
+        }
+        
+        .status-segment.error {
+            background: #ed8936;
+        }
+        
+        .status-segment.skipped {
+            background: #cbd5e0;
+        }
+        
+        .class-table {
+            width: 100%;
+            background: white;
+        }
+        
+        .class-table thead tr {
+            background: #f7fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .class-table tbody tr:last-child {
+            border-bottom: none;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #718096;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .summary {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 0.9em;
+            }
+            
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>{{ title or 'Test Results Dashboard' }}</h1>
+            <p class="subtitle">Execution Time: {{ summary.time }}s</p>
+        </header>
+        
+        <div class="summary">
+                <div class="summary-card total">
+                    <h3>Total Tests</h3>
+                    <div class="value">{{ summary.total }}</div>
+                    <div class="subvalue">100%</div>
+                </div>
+                <div class="summary-card passed">
+                    <h3>Passed</h3>
+                    <div class="value">{{ summary.passed }}</div>
+                    <div class="subvalue">{% if summary.total > 0 %}{{ (summary.passed / summary.total * 100)|round(1) }}%{% else %}0%{% endif %}</div>
+                </div>
+                <div class="summary-card failed">
+                    <h3>Failed</h3>
+                    <div class="value">{{ summary.failed }}</div>
+                    <div class="subvalue">{% if summary.total > 0 %}{{ (summary.failed / summary.total * 100)|round(1) }}%{% else %}0%{% endif %}</div>
+                </div>
+                <div class="summary-card errors">
+                    <h3>Errors</h3>
+                    <div class="value">{{ summary.errors }}</div>
+                    <div class="subvalue">{% if summary.total > 0 %}{{ (summary.errors / summary.total * 100)|round(1) }}%{% else %}0%{% endif %}</div>
+                </div>
+                <div class="summary-card skipped">
+                    <h3>Skipped</h3>
+                    <div class="value">{{ summary.skipped }}</div>
+                    <div class="subvalue">{% if summary.total > 0 %}{{ (summary.skipped / summary.total * 100)|round(1) }}%{% else %}0%{% endif %}</div>
+                </div>
+        </div>
+        
+        <div class="pass-rate">
+            <div class="pass-rate-bar">
+                {% if summary.passed > 0 %}<div class="pass-rate-segment passed" style="flex: {{ summary.passed }}">{{ summary.passed }} Passed</div>{% endif %}
+                {% if summary.failed > 0 %}<div class="pass-rate-segment failed" style="flex: {{ summary.failed }}">{{ summary.failed }} Failed</div>{% endif %}
+                {% if summary.errors > 0 %}<div class="pass-rate-segment error" style="flex: {{ summary.errors }}">{{ summary.errors }} Errors</div>{% endif %}
+                {% if summary.skipped > 0 %}<div class="pass-rate-segment skipped" style="flex: {{ summary.skipped }}">{{ summary.skipped }} Skipped</div>{% endif %}
+            </div>
+        </div>
+        
+        <div class="test-results">
+            <div class="filters">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterTests('all')">All ({{ summary.total }})</button>
+                    <button class="filter-btn" onclick="filterTests('passed')">Passed ({{ summary.passed }})</button>
+                    <button class="filter-btn" onclick="filterTests('failed')">Failed ({{ summary.failed + summary.errors }})</button>
+                    <button class="filter-btn" onclick="filterTests('skipped')">Skipped ({{ summary.skipped }})</button>
+                </div>
+                <input type="text" id="searchInput" class="search-box" placeholder="Search by class or test name..." onkeyup="searchTests()">
+            </div>
+            
+            {% set classes = {} %}
+            {% for test in test_cases %}
+                {% if test.classname not in classes %}
+                    {% set _ = classes.update({test.classname: []}) %}
+                {% endif %}
+                {% set _ = classes[test.classname].append(test) %}
+            {% endfor %}
+            
+            {% for classname in classes|sort %}
+            <div class="test-class">
+                <div class="class-header" onclick="toggleClass(this)">
+                    <span class="toggle-icon">▼</span>
+                    <strong>{{ classname }}</strong>
+                    <span class="class-summary">
+                        ({{ classes[classname]|length }} tests)
+                    </span>
+                    {% set class_tests = classes[classname] %}
+                    {% set passed = class_tests|selectattr('status', 'equalto', 'passed')|list|length %}
+                    {% set failed = class_tests|selectattr('status', 'equalto', 'failed')|list|length %}
+                    {% set errors = class_tests|selectattr('status', 'equalto', 'error')|list|length %}
+                    {% set skipped = class_tests|selectattr('status', 'equalto', 'skipped')|list|length %}
+                    <div class="class-status-bar">
+                        {% if passed > 0 %}<div class="status-segment passed" style="flex: {{ passed }}"></div>{% endif %}
+                        {% if failed > 0 %}<div class="status-segment failed" style="flex: {{ failed }}"></div>{% endif %}
+                        {% if errors > 0 %}<div class="status-segment error" style="flex: {{ errors }}"></div>{% endif %}
+                        {% if skipped > 0 %}<div class="status-segment skipped" style="flex: {{ skipped }}"></div>{% endif %}
+                    </div>
+                </div>
+                <table class="class-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Test Name</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test in classes[classname] %}
+                        <tr class="{{ test.status }}" data-status="{{ test.status }}">
+                            <td>
+                                <span class="status-badge {{ test.status }}">{{ test.status }}</span>
+                            </td>
+                            <td>
+                                <strong>{{ test.name }}</strong>
+                                {% if test.message %}
+                                <div class="error-message">{{ test.message }}</div>
+                                {% endif %}
+                                {% if test.output %}
+                                <details>
+                                    <summary style="cursor: pointer; color: #4299e1; margin-top: 5px;">Show output</summary>
+                                    <div class="test-output">{{ test.output }}</div>
+                                </details>
+                                {% endif %}
+                            </td>
+                            <td class="time">{{ test.time }}s</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <footer>
+            Generated by <a href="https://github.com/gorkalertxundi/junit-report-generator" target="_blank" style="color: #667eea; text-decoration: none;">JUnit Report Generator</a> • {{ summary.total }} tests executed in {{ summary.time }}s
+        </footer>
+    </div>
+    
+    <script>
+        let currentStatusFilter = 'all';
+        
+        function toggleClass(headerElement) {
+            const classDiv = headerElement.closest('.test-class');
+            const table = classDiv.querySelector('.class-table');
+            
+            headerElement.classList.toggle('collapsed');
+            table.style.display = headerElement.classList.contains('collapsed') ? 'none' : '';
+        }
+        
+        function searchTests() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const classGroups = document.querySelectorAll('.test-class');
+            
+            classGroups.forEach(classDiv => {
+                const classHeader = classDiv.querySelector('.class-header strong');
+                const className = classHeader.textContent.toLowerCase();
+                const rows = classDiv.querySelectorAll('.class-table tbody tr');
+                let visibleCount = 0;
+                
+                rows.forEach(row => {
+                    const testName = row.querySelector('strong').textContent.toLowerCase();
+                    const matchesSearch = className.includes(searchInput) || testName.includes(searchInput);
+                    
+                    if (currentStatusFilter === 'all') {
+                        row.style.display = matchesSearch ? '' : 'none';
+                        if (matchesSearch) visibleCount++;
+                    } else if (currentStatusFilter === 'failed') {
+                        const matchesStatus = row.dataset.status === 'failed' || row.dataset.status === 'error';
+                        row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
+                        if (matchesStatus && matchesSearch) visibleCount++;
+                    } else {
+                        const matchesStatus = row.dataset.status === currentStatusFilter;
+                        row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
+                        if (matchesStatus && matchesSearch) visibleCount++;
+                    }
+                });
+                
+                classDiv.style.display = visibleCount > 0 ? '' : 'none';
+            });
+        }
+        
+        function filterTests(status) {
+            currentStatusFilter = status;
+            const classGroups = document.querySelectorAll('.test-class');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            // Update button states
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Apply both status filter and search
+            searchTests();
+        }
+    </script>
+</body>
+</html>

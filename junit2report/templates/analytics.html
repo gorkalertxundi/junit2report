@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid;
+        }
+        
+        .summary-card.total {
+            border-left-color: #667eea;
+        }
+        
+        .summary-card.passed {
+            border-left-color: #48bb78;
+        }
+        
+        .summary-card.failed {
+            border-left-color: #f56565;
+        }
+        
+        .summary-card.errors {
+            border-left-color: #ed8936;
+        }
+        
+        .summary-card.skipped {
+            border-left-color: #cbd5e0;
+        }
+        
+        .summary-card h3 {
+            font-size: 0.9em;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+        
+        .summary-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .summary-card .subvalue {
+            margin-top: 4px;
+            font-size: 0.9em;
+            color: #718096;
+        }
+        
+        .pass-rate {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pass-rate-bar {
+            display: flex;
+            gap: 0;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f1f1f1;
+        }
+        
+        .pass-rate-segment {
+            flex: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: flex 0.3s ease;
+            min-width: 40px;
+        }
+        
+        .pass-rate-segment.passed {
+            background: #48bb78;
+        }
+        
+        .pass-rate-segment.failed {
+            background: #f56565;
+        }
+        
+        .pass-rate-segment.error {
+            background: #ed8936;
+        }
+        
+        .pass-rate-segment.skipped {
+            background: #cbd5e0;
+        }
+        
+        .analytics-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .analytics-section h2 {
+            padding: 20px;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2d3748;
+            font-size: 1.3em;
+            margin: 0;
+        }
+        
+        .analytics-content {
+            padding: 20px;
+        }
+        
+        .performance-metric {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .metric-card {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .metric-card.slow {
+            border-left-color: #ed8936;
+        }
+        
+        .metric-card.fast {
+            border-left-color: #48bb78;
+        }
+        
+        .metric-label {
+            font-size: 0.85em;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+        
+        .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .metric-name {
+            font-size: 0.9em;
+            color: #4a5568;
+            margin-top: 8px;
+            word-break: break-word;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #f7fafc;
+        }
+        
+        th {
+            text-align: left;
+            padding: 15px 20px;
+            font-weight: 600;
+            color: #4a5568;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        td {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        
+        tr:hover {
+            background: #f7fafc;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-badge.passed {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status-badge.failed, .status-badge.error {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .status-badge.skipped {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .class-performance {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .class-performance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .class-performance-header h3 {
+            font-size: 1.1em;
+            color: #2d3748;
+            margin: 0;
+        }
+        
+        .class-time {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .class-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .class-stat {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        
+        .class-stat strong {
+            display: block;
+            font-size: 1.4em;
+            color: #667eea;
+        }
+        
+        .error-message-box {
+            background: #fff5f5;
+            padding: 15px;
+            border-left: 3px solid #f56565;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #742a2a;
+        }
+        
+        .error-count {
+            display: inline-block;
+            background: #f56565;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #718096;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .summary {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 0.9em;
+            }
+            
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Test Results Analytics Dashboard</h1>
+            <p class="subtitle">Execution Time: {{ summary.time }}s</p>
+        </header>
+        
+        <!-- Charts Section -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <canvas id="statusChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="classCountChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="classTimeChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="failureDistributionChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="passRateChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Performance Analytics Section -->
+        {% set sorted_tests = test_cases|sort(attribute='time', reverse=true) %}
+        {% set slowest_tests = sorted_tests[:10] if sorted_tests|length >= 10 else sorted_tests %}
+        {% set fastest_tests_all = sorted_tests|reverse|sort(attribute='time')|list %}
+        {% set fastest_tests = fastest_tests_all[:10] if fastest_tests_all|length >= 10 else fastest_tests_all %}
+        
+        <!-- Performance by Class -->
+        <div class="analytics-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #f7fafc; border-bottom: 1px solid #e2e8f0;">
+                <h2 style="margin: 0;">📈 Performance by Test Class</h2>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <label for="classFilterInput" style="margin: 0; font-size: 0.9em; color: #4a5568;">Show top:</label>
+                    <input type="number" id="classFilterInput" value="10" min="1" style="width: 50px; padding: 6px; border: 1px solid #cbd5e0; border-radius: 4px;">
+                    <button onclick="filterPerformanceClasses()" style="padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">Filter</button>
+                </div>
+            </div>
+            <div class="analytics-content">
+                {% set sorted_tests = test_cases|sort(attribute='time', reverse=true) %}
+                {% set classes = {} %}
+                {% for test in test_cases %}
+                    {% if test.classname not in classes %}
+                        {% set _ = classes.update({test.classname: {'tests': [], 'total_time': 0, 'passed': 0, 'failed': 0, 'errors': 0, 'skipped': 0}}) %}
+                    {% endif %}
+                    {% set _ = classes[test.classname]['tests'].append(test) %}
+                    {% set _ = classes[test.classname].update({'total_time': classes[test.classname]['total_time'] + test.time|float}) %}
+                    {% if test.status == 'passed' %}
+                        {% set _ = classes[test.classname].update({'passed': classes[test.classname]['passed'] + 1}) %}
+                    {% elif test.status == 'failed' %}
+                        {% set _ = classes[test.classname].update({'failed': classes[test.classname]['failed'] + 1}) %}
+                    {% elif test.status == 'error' %}
+                        {% set _ = classes[test.classname].update({'errors': classes[test.classname]['errors'] + 1}) %}
+                    {% elif test.status == 'skipped' %}
+                        {% set _ = classes[test.classname].update({'skipped': classes[test.classname]['skipped'] + 1}) %}
+                    {% endif %}
+                {% endfor %}
+                
+                <div id="performanceClassesContainer">
+                {% for classname in classes|sort %}
+                    {% set class_info = classes[classname] %}
+                    <div class="class-performance">
+                        <div class="class-performance-header">
+                            <h3>{{ classname }}</h3>
+                            <div class="class-time">{{ class_info.total_time|round(2) }}s total</div>
+                        </div>
+                        <div class="class-stats">
+                            <div class="class-stat">
+                                <strong>{{ class_info.tests|length }}</strong>
+                                Total Tests
+                            </div>
+                            <div class="class-stat">
+                                <strong style="color: #48bb78;">{{ class_info.passed }}</strong>
+                                Passed
+                            </div>
+                            <div class="class-stat">
+                                <strong style="color: #f56565;">{{ class_info.failed }}</strong>
+                                Failed
+                            </div>
+                            <div class="class-stat">
+                                <strong style="color: #ed8936;">{{ class_info.errors }}</strong>
+                                Errors
+                            </div>
+                            <div class="class-stat">
+                                <strong style="color: #cbd5e0;">{{ class_info.skipped }}</strong>
+                                Skipped
+                            </div>
+                            <div class="class-stat">
+                                <strong>{{ (class_info.total_time / class_info.tests|length)|round(3) }}s</strong>
+                                Avg/Test
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Error Analysis -->
+        <div class="analytics-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #f7fafc; border-bottom: 1px solid #e2e8f0;">
+                <h2 style="margin: 0;">🔍 Error Analysis</h2>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <label for="errorFilterInput" style="margin: 0; font-size: 0.9em; color: #4a5568;">Show top:</label>
+                    <input type="number" id="errorFilterInput" value="10" min="1" style="width: 50px; padding: 6px; border: 1px solid #cbd5e0; border-radius: 4px;">
+                    <button onclick="filterErrorMessages()" style="padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">Filter</button>
+                </div>
+            </div>
+            <div class="analytics-content">
+                {% set error_messages = {} %}
+                {% for test in test_cases %}
+                    {% if test.message %}
+                        {% if test.message not in error_messages %}
+                            {% set _ = error_messages.update({test.message: {'count': 0, 'tests': []}}) %}
+                        {% endif %}
+                        {% set _ = error_messages[test.message].update({'count': error_messages[test.message]['count'] + 1}) %}
+                        {% set _ = error_messages[test.message]['tests'].append(test.name) %}
+                    {% endif %}
+                {% endfor %}
+                
+                <div id="errorMessagesContainer">
+                {% if error_messages %}
+                    {% for message in error_messages|sort %}
+                        <div class="error-message-box">
+                            <strong>{{ message }}</strong>
+                            <span class="error-count">{{ error_messages[message].count }}x</span>
+                            <div style="margin-top: 8px; font-size: 0.85em;">
+                                Tests affected: {{ error_messages[message].tests|join(', ') }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #48bb78; text-align: center; padding: 20px;">✓ No errors found!</p>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slowest Tests -->
+        <div class="analytics-section">
+            <h2>⏱️ Slowest Tests (Top 10)</h2>
+            <div class="analytics-content">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Test Name</th>
+                                <th>Class</th>
+                                <th>Execution Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for test in slowest_tests %}
+                            <tr>
+                                <td><strong>{{ test.name }}</strong></td>
+                                <td>{{ test.classname }}</td>
+                                <td class="time"><strong>{{ test.time }}s</strong></td>
+                                <td><span class="status-badge {{ test.status }}">{{ test.status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fastest Tests -->
+        <div class="analytics-section">
+            <h2>⚡ Fastest Tests (Top 10)</h2>
+            <div class="analytics-content">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Test Name</th>
+                                <th>Class</th>
+                                <th>Execution Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for test in fastest_tests %}
+                            <tr>
+                                <td><strong>{{ test.name }}</strong></td>
+                                <td>{{ test.classname }}</td>
+                                <td class="time"><strong>{{ test.time }}s</strong></td>
+                                <td><span class="status-badge {{ test.status }}">{{ test.status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            Generated by <a href="https://github.com/gorkalertxundi/junit-report-generator" target="_blank" style="color: #667eea; text-decoration: none;">JUnit Report Generator</a> • {{ summary.total }} tests executed in {{ summary.time }}s
+        </footer>
+    </div>
+    
+    <script>
+        // Filter function for Performance by Class section
+        function filterPerformanceClasses() {
+            const limit = parseInt(document.getElementById('classFilterInput').value) || 10;
+            const container = document.getElementById('performanceClassesContainer');
+            const items = container.querySelectorAll('.class-performance');
+            
+            // Sort by total time (descending) for display
+            const sortedItems = Array.from(items).sort((a, b) => {
+                const timeA = parseFloat(a.querySelector('.class-time').textContent);
+                const timeB = parseFloat(b.querySelector('.class-time').textContent);
+                return timeB - timeA;
+            });
+            
+            // Show/hide based on limit
+            sortedItems.forEach((item, index) => {
+                item.style.display = index < limit ? '' : 'none';
+            });
+        }
+        
+        // Filter function for Error Analysis section
+        function filterErrorMessages() {
+            const limit = parseInt(document.getElementById('errorFilterInput').value) || 10;
+            const container = document.getElementById('errorMessagesContainer');
+            const items = container.querySelectorAll('.error-message-box');
+            
+            // Sort by count (descending) for display
+            const sortedItems = Array.from(items).sort((a, b) => {
+                const countA = parseInt(a.querySelector('.error-count').textContent);
+                const countB = parseInt(b.querySelector('.error-count').textContent);
+                return countB - countA;
+            });
+            
+            // Show/hide based on limit
+            sortedItems.forEach((item, index) => {
+                item.style.display = index < limit ? '' : 'none';
+            });
+        }
+
+        // Prepare data for charts
+        {% set classes = {} %}
+        {% for test in test_cases %}
+            {% if test.classname not in classes %}
+                {% set _ = classes.update({test.classname: {'count': 0, 'total_time': 0}}) %}
+            {% endif %}
+            {% set _ = classes[test.classname].update({'count': classes[test.classname]['count'] + 1}) %}
+            {% set _ = classes[test.classname].update({'total_time': classes[test.classname]['total_time'] + test.time|float}) %}
+        {% endfor %}
+        
+        // Status Distribution Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Passed', 'Failed', 'Errors', 'Skipped'],
+                datasets: [{
+                    data: [{{ summary.passed }}, {{ summary.failed }}, {{ summary.errors }}, {{ summary.skipped }}],
+                    backgroundColor: ['#48bb78', '#f56565', '#ed8936', '#cbd5e0'],
+                    borderColor: ['#38a169', '#e53e3e', '#dd6b20', '#a0aec0'],
+                    borderWidth: 2,
+                    circumference: 360,
+                    rotation: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 14, weight: 'bold' },
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Test Status Distribution',
+                        font: { size: 16, weight: 'bold' }
+                    }
+                }
+            }
+        });
+        
+        // Test Count by Class
+        const classLabels = [{% for classname in classes|sort %}'{{ classname }}'{{ "," if not loop.last }}{% endfor %}];
+        const classCounts = [{% for classname in classes|sort %}{{ classes[classname]['count'] }}{{ "," if not loop.last }}{% endfor %}];
+        
+        const countCtx = document.getElementById('classCountChart').getContext('2d');
+        new Chart(countCtx, {
+            type: 'bar',
+            data: {
+                labels: classLabels,
+                datasets: [{
+                    label: 'Number of Tests',
+                    data: classCounts,
+                    backgroundColor: '#667eea',
+                    borderColor: '#5568d3',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { font: { size: 12 } }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Test Count by Class',
+                        font: { size: 16, weight: 'bold' }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+        
+        // Execution Time by Class
+        const classTimesData = [{% for classname in classes|sort %}{{ classes[classname]['total_time']|round(2) }}{{ "," if not loop.last }}{% endfor %}];
+        
+        const timeCtx = document.getElementById('classTimeChart').getContext('2d');
+        new Chart(timeCtx, {
+            type: 'bar',
+            data: {
+                labels: classLabels,
+                datasets: [{
+                    label: 'Total Execution Time (s)',
+                    data: classTimesData,
+                    backgroundColor: '#764ba2',
+                    borderColor: '#6a3f93',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { font: { size: 12 } }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Execution Time by Class',
+                        font: { size: 16, weight: 'bold' }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Calculate class statistics for additional charts
+        const classStats = {};
+        [{% for test in test_cases %}
+        { name: '{{ test.classname }}', status: '{{ test.status }}', time: {{ test.time|float }}, passed: {{ 1 if test.status == 'passed' else 0 }}, failed: {{ 1 if test.status == 'failed' else 0 }}, error: {{ 1 if test.status == 'error' else 0 }} }{{ "," if not loop.last }}{% endfor %}
+        ].forEach(test => {
+            if (!classStats[test.name]) {
+                classStats[test.name] = { count: 0, passed: 0, failed: 0, error: 0, totalTime: 0 };
+            }
+            classStats[test.name].count++;
+            classStats[test.name].passed += test.passed;
+            classStats[test.name].failed += test.failed;
+            classStats[test.name].error += test.error;
+            classStats[test.name].totalTime += test.time;
+        });
+
+        // Failure Distribution by Class
+        const failureClassLabels = Object.keys(classStats).sort();
+        const failureData = failureClassLabels.map(className => classStats[className].failed + classStats[className].error);
+        
+        const failureCtx = document.getElementById('failureDistributionChart').getContext('2d');
+        new Chart(failureCtx, {
+            type: 'bar',
+            data: {
+                labels: failureClassLabels,
+                datasets: [{
+                    label: 'Failed + Errors',
+                    data: failureData,
+                    backgroundColor: '#f56565',
+                    borderColor: '#e53e3e',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { font: { size: 12 } }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Failure Distribution by Class',
+                        font: { size: 16, weight: 'bold' }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+
+        // Pass Rate by Class
+        const passRateData = failureClassLabels.map(className => {
+            const stats = classStats[className];
+            return (stats.passed / stats.count * 100).toFixed(1);
+        });
+        
+        const passRateCtx = document.getElementById('passRateChart').getContext('2d');
+        new Chart(passRateCtx, {
+            type: 'bar',
+            data: {
+                labels: failureClassLabels,
+                datasets: [{
+                    label: 'Pass Rate (%)',
+                    data: passRateData,
+                    backgroundColor: failureClassLabels.map((_, i) => {
+                        const rate = parseFloat(passRateData[i]);
+                        if (rate >= 80) return '#48bb78';
+                        if (rate >= 60) return '#f6ad55';
+                        if (rate >= 40) return '#fc8181';
+                        return '#cbd5e0';
+                    }),
+                    borderColor: '#2d3748',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { font: { size: 12 } }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Pass Rate by Class (%)',
+                        font: { size: 16, weight: 'bold' }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { stepSize: 20 }
+                    }
+                }
+            }
+        });
+
+        // Test Status Breakdown (Pie Chart)
+        const statusPieCtx = document.getElementById('statusPieChart').getContext('2d');
+        new Chart(statusPieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Passed', 'Failed', 'Errors', 'Skipped'],
+                datasets: [{
+                    data: [{{ summary.passed }}, {{ summary.failed }}, {{ summary.errors }}, {{ summary.skipped }}],
+                    backgroundColor: ['#48bb78', '#f56565', '#ed8936', '#cbd5e0'],
+                    borderColor: ['#38a169', '#e53e3e', '#dd6b20', '#a0aec0'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 14, weight: 'bold' },
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Test Status Breakdown',
+                        font: { size: 16, weight: 'bold' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

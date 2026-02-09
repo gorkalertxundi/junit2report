@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+    <testsuite name="MathTestSuite" tests="8" failures="1" errors="1" skipped="1" time="5.234">
+        <testcase name="test_addition" classname="com.example.MathTest" time="0.045">
+        </testcase>
+        <testcase name="test_subtraction" classname="com.example.MathTest" time="0.052">
+        </testcase>
+        <testcase name="test_division" classname="com.example.MathTest" time="2.134">
+            <failure message="Division by zero">
+java.lang.ArithmeticException: / by zero
+    at com.example.MathTest.test_division(MathTest.java:25)
+            </failure>
+        </testcase>
+        <testcase name="test_multiplication" classname="com.example.MathTest" time="1.876">
+            <error message="NullPointerException">
+java.lang.NullPointerException: Cannot invoke method on null
+    at com.example.MathTest.test_multiplication(MathTest.java:35)
+            </error>
+        </testcase>
+        <testcase name="test_modulo" classname="com.example.MathTest" time="0.038">
+            <skipped message="Not implemented yet"/>
+        </testcase>
+        <testcase name="test_power" classname="com.example.MathTest" time="0.567">
+        </testcase>
+        <testcase name="test_sqrt" classname="com.example.MathTest" time="0.342">
+        </testcase>
+        <testcase name="test_factorial" classname="com.example.MathTest" time="0.180">
+        </testcase>
+    </testsuite>
+    
+    <testsuite name="StringTestSuite" tests="6" failures="0" errors="0" skipped="0" time="2.456">
+        <testcase name="test_concat" classname="com.example.StringTest" time="0.234">
+        </testcase>
+        <testcase name="test_trim" classname="com.example.StringTest" time="0.156">
+        </testcase>
+        <testcase name="test_uppercase" classname="com.example.StringTest" time="1.234">
+        </testcase>
+        <testcase name="test_lowercase" classname="com.example.StringTest" time="0.189">
+        </testcase>
+        <testcase name="test_contains" classname="com.example.StringTest" time="0.456">
+        </testcase>
+        <testcase name="test_replace" classname="com.example.StringTest" time="0.187">
+        </testcase>
+    </testsuite>
+    
+    <testsuite name="ArrayTestSuite" tests="7" failures="1" errors="0" skipped="1" time="4.678">
+        <testcase name="test_sort" classname="com.example.ArrayTest" time="1.567">
+        </testcase>
+        <testcase name="test_reverse" classname="com.example.ArrayTest" time="0.234">
+        </testcase>
+        <testcase name="test_find" classname="com.example.ArrayTest" time="0.876">
+        </testcase>
+        <testcase name="test_filter" classname="com.example.ArrayTest" time="1.234">
+            <failure message="Filter logic incorrect">
+Expected array [1, 3, 5] but got [1, 2, 3]
+    at com.example.ArrayTest.test_filter(ArrayTest.java:45)
+            </failure>
+        </testcase>
+        <testcase name="test_map" classname="com.example.ArrayTest" time="0.567">
+        </testcase>
+        <testcase name="test_reduce" classname="com.example.ArrayTest" time="0.089">
+            <skipped message="Pending implementation"/>
+        </testcase>
+        <testcase name="test_unique" classname="com.example.ArrayTest" time="0.111">
+        </testcase>
+    </testsuite>
+    
+    <testsuite name="FileIOTestSuite" tests="5" failures="0" errors="1" skipped="0" time="3.412">
+        <testcase name="test_read_file" classname="com.example.FileIOTest" time="0.789">
+        </testcase>
+        <testcase name="test_write_file" classname="com.example.FileIOTest" time="1.234">
+        </testcase>
+        <testcase name="test_append_file" classname="com.example.FileIOTest" time="0.876">
+        </testcase>
+        <testcase name="test_delete_file" classname="com.example.FileIOTest" time="0.345">
+            <error message="File permission denied">
+java.io.IOException: Permission denied
+    at com.example.FileIOTest.test_delete_file(FileIOTest.java:67)
+            </error>
+        </testcase>
+        <testcase name="test_exists_file" classname="com.example.FileIOTest" time="0.168">
+        </testcase>
+    </testsuite>
+    
+    <testsuite name="DatabaseTestSuite" tests="6" failures="1" errors="0" skipped="1" time="6.234">
+        <testcase name="test_connect" classname="com.example.DatabaseTest" time="2.456">
+        </testcase>
+        <testcase name="test_select" classname="com.example.DatabaseTest" time="1.234">
+        </testcase>
+        <testcase name="test_insert" classname="com.example.DatabaseTest" time="0.876">
+            <failure message="Duplicate key error">
+SQL Error: Duplicate entry 'test123' for key 'PRIMARY'
+    at com.example.DatabaseTest.test_insert(DatabaseTest.java:34)
+            </failure>
+        </testcase>
+        <testcase name="test_update" classname="com.example.DatabaseTest" time="1.123">
+        </testcase>
+        <testcase name="test_delete" classname="com.example.DatabaseTest" time="0.345">
+        </testcase>
+        <testcase name="test_transaction" classname="com.example.DatabaseTest" time="0.200">
+            <skipped message="Integration test disabled for CI"/>
+        </testcase>
+    </testsuite>
+    
+    <testsuite name="APITestSuite" tests="5" failures="0" errors="1" skipped="0" time="3.678">
+        <testcase name="test_get_request" classname="com.example.APITest" time="0.456">
+        </testcase>
+        <testcase name="test_post_request" classname="com.example.APITest" time="1.234">
+        </testcase>
+        <testcase name="test_put_request" classname="com.example.APITest" time="0.789">
+        </testcase>
+        <testcase name="test_delete_request" classname="com.example.APITest" time="1.087">
+            <error message="Connection timeout">
+java.net.SocketTimeoutException: Connection timed out after 30 seconds
+    at com.example.APITest.test_delete_request(APITest.java:89)
+            </error>
+        </testcase>
+        <testcase name="test_error_handling" classname="com.example.APITest" time="0.112">
+        </testcase>
+    </testsuite>
+</testsuites>

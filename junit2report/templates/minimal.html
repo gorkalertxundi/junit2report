@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results - Minimal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            padding: 10px;
+            background: #fff;
+            color: #000;
+        }
+        
+        .container {
+            max-width: 100%;
+        }
+        
+        h1 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+        }
+        
+        .summary {
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background: #f5f5f5;
+        }
+        
+        .summary-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .summary-item {
+            display: inline-block;
+        }
+        
+        .summary-item strong {
+            font-weight: bold;
+        }
+        
+        .pass-rate {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            padding: 4px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 11px;
+            width: 250px;
+        }
+        
+        .filter-btn {
+            padding: 4px 10px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+        
+        .filter-btn:hover {
+            background: #e9e9e9;
+        }
+        
+        .filter-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .test-class {
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+        
+        .class-header {
+            background: #e0e0e0;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            user-select: none;
+            font-weight: bold;
+            font-size: 12px;
+            border-bottom: 1px solid #999;
+            transition: background 0.2s;
+        }
+        
+        .class-header:hover {
+            background: #d0d0d0;
+        }
+        
+        .toggle-icon {
+            display: inline-block;
+            margin-right: 8px;
+            transition: transform 0.2s;
+            font-size: 10px;
+        }
+        
+        .class-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .class-summary {
+            margin-left: auto;
+            font-size: 10px;
+            font-weight: normal;
+        }
+        
+        .class-status-bar {
+            display: flex;
+            gap: 0;
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-left: 15px;
+            min-width: 60px;
+            background: #ddd;
+        }
+        
+        .status-segment {
+            flex: 0;
+            transition: flex 0.3s ease;
+        }
+        
+        .status-segment.passed {
+            background: #28a745;
+        }
+        
+        .status-segment.failed {
+            background: #dc3545;
+        }
+        
+        .status-segment.error {
+            background: #fd7e14;
+        }
+        
+        .status-segment.skipped {
+            background: #999;
+        }
+        
+        .class-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .class-table th {
+            background: #e0e0e0;
+            font-weight: bold;
+            text-align: left;
+            padding: 5px;
+            border: 1px solid #000;
+            font-size: 11px;
+        }
+        
+        .class-table td {
+            padding: 4px 5px;
+            border: 1px solid #ccc;
+            vertical-align: top;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000;
+        }
+        
+        th {
+            background: #e0e0e0;
+            font-weight: bold;
+            text-align: left;
+            padding: 5px;
+            border: 1px solid #000;
+            font-size: 12px;
+        }
+        
+        td {
+            padding: 4px 5px;
+            border: 1px solid #ccc;
+            vertical-align: top;
+        }
+        
+        tr.passed {
+            background: #d4edda;
+        }
+        
+        tr.failed, tr.error {
+            background: #f8d7da;
+        }
+        
+        tr.skipped {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+        
+        .status {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 10px;
+        }
+        
+        .status.passed {
+            color: #28a745;
+        }
+        
+        .status.failed, .status.error {
+            color: #dc3545;
+        }
+        
+        .status.skipped {
+            color: #6c757d;
+        }
+        
+        .error-message {
+            margin-top: 3px;
+            padding: 5px;
+            background: #fff;
+            border-left: 2px solid #dc3545;
+            font-family: monospace;
+            font-size: 11px;
+            white-space: pre-wrap;
+        }
+        
+        .test-output {
+            margin-top: 3px;
+            padding: 5px;
+            background: #f8f9fa;
+            border-left: 2px solid #007bff;
+            font-family: monospace;
+            font-size: 10px;
+            white-space: pre-wrap;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        footer {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        @media print {
+            .test-output {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ title or 'Test Results Report' }}</h1>
+        
+        <div class="summary">
+            <div class="summary-row">
+                <div class="summary-item">
+                    <strong>Total:</strong> {{ summary.total }}
+                </div>
+                <div class="summary-item">
+                    <strong>Passed:</strong> <span style="color: #28a745;">{{ summary.passed }}</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Failed:</strong> <span style="color: #dc3545;">{{ summary.failed }}</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Errors:</strong> <span style="color: #dc3545;">{{ summary.errors }}</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Skipped:</strong> {{ summary.skipped }}
+                </div>
+                <div class="summary-item">
+                    <strong>Time:</strong> {{ summary.time }}s
+                </div>
+            </div>
+            <div class="pass-rate">Pass Rate: {{ summary.pass_rate }}%</div>
+        </div>
+        
+        <div class="filters">
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterTests('all')">All ({{ summary.total }})</button>
+                <button class="filter-btn" onclick="filterTests('passed')">Passed ({{ summary.passed }})</button>
+                <button class="filter-btn" onclick="filterTests('failed')">Failed ({{ summary.failed + summary.errors }})</button>
+                <button class="filter-btn" onclick="filterTests('skipped')">Skipped ({{ summary.skipped }})</button>
+            </div>
+            <input type="text" id="searchInput" class="search-box" placeholder="Search by class or test name..." onkeyup="searchTests()">
+        </div>
+        
+        {% set classes = {} %}
+        {% for test in test_cases %}
+            {% if test.classname not in classes %}
+                {% set _ = classes.update({test.classname: []}) %}
+            {% endif %}
+            {% set _ = classes[test.classname].append(test) %}
+        {% endfor %}
+        
+        {% for classname in classes|sort %}
+        <div class="test-class">
+            <div class="class-header" onclick="toggleClass(this)">
+                <span class="toggle-icon">▼</span>
+                <strong>{{ classname }}</strong>
+                <span class="class-summary">
+                    ({{ classes[classname]|length }} tests)
+                </span>
+                {% set class_tests = classes[classname] %}
+                {% set passed = class_tests|selectattr('status', 'equalto', 'passed')|list|length %}
+                {% set failed = class_tests|selectattr('status', 'equalto', 'failed')|list|length %}
+                {% set errors = class_tests|selectattr('status', 'equalto', 'error')|list|length %}
+                {% set skipped = class_tests|selectattr('status', 'equalto', 'skipped')|list|length %}
+                <div class="class-status-bar">
+                    {% if passed > 0 %}<div class="status-segment passed" style="flex: {{ passed }}"></div>{% endif %}
+                    {% if failed > 0 %}<div class="status-segment failed" style="flex: {{ failed }}"></div>{% endif %}
+                    {% if errors > 0 %}<div class="status-segment error" style="flex: {{ errors }}"></div>{% endif %}
+                    {% if skipped > 0 %}<div class="status-segment skipped" style="flex: {{ skipped }}"></div>{% endif %}
+                </div>
+            </div>
+            <table class="class-table">
+                <thead>
+                    <tr>
+                        <th style="width: 8%;">Status</th>
+                        <th style="width: 50%;">Test Name</th>
+                        <th style="width: 12%;">Time (s)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in classes[classname] %}
+                    <tr class="{{ test.status }}" data-status="{{ test.status }}">
+                        <td>
+                            <span class="status {{ test.status }}">{{ test.status }}</span>
+                        </td>
+                        <td>
+                            {{ test.name }}
+                            {% if test.message %}
+                            <div class="error-message">{{ test.message }}</div>
+                            {% endif %}
+                            {% if test.output %}
+                            <div class="test-output">{{ test.output }}</div>
+                            {% endif %}
+                        </td>
+                        <td>{{ test.time }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+        
+        <footer>
+            Generated by <a href="https://github.com/gorkalertxundi/junit-report-generator" target="_blank" style="color: #007bff; text-decoration: none;">JUnit Report Generator</a> | {{ summary.total }} tests executed in {{ summary.time }}s
+        </footer>
+    </div>
+    
+    <script>
+        let currentStatusFilter = 'all';
+        
+        function toggleClass(headerElement) {
+            const classDiv = headerElement.closest('.test-class');
+            const table = classDiv.querySelector('.class-table');
+            
+            headerElement.classList.toggle('collapsed');
+            table.style.display = headerElement.classList.contains('collapsed') ? 'none' : '';
+        }
+        
+        function searchTests() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const classGroups = document.querySelectorAll('.test-class');
+            
+            classGroups.forEach(classDiv => {
+                const classHeader = classDiv.querySelector('.class-header strong');
+                const className = classHeader.textContent.toLowerCase();
+                const rows = classDiv.querySelectorAll('.class-table tbody tr');
+                let visibleCount = 0;
+                
+                rows.forEach(row => {
+                    const testName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const matchesSearch = className.includes(searchInput) || testName.includes(searchInput);
+                    
+                    if (currentStatusFilter === 'all') {
+                        row.style.display = matchesSearch ? '' : 'none';
+                        if (matchesSearch) visibleCount++;
+                    } else if (currentStatusFilter === 'failed') {
+                        const matchesStatus = row.dataset.status === 'failed' || row.dataset.status === 'error';
+                        row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
+                        if (matchesStatus && matchesSearch) visibleCount++;
+                    } else {
+                        const matchesStatus = row.dataset.status === currentStatusFilter;
+                        row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
+                        if (matchesStatus && matchesSearch) visibleCount++;
+                    }
+                });
+                
+                classDiv.style.display = visibleCount > 0 ? '' : 'none';
+            });
+        }
+        
+        function filterTests(status) {
+            currentStatusFilter = status;
+            const classGroups = document.querySelectorAll('.test-class');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            // Update button states
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Apply both status filter and search
+            searchTests();
+        }
+    </script>
+</body>
+</html>
