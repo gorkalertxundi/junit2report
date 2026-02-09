@@ -1,8 +1,8 @@
-# JUnit Report Generator
+# JUnit To Report Generator
 
-![PyPI - Version](https://img.shields.io/pypi/v/junit2html) ![License](https://img.shields.io/pypi/l/junit2html) ![Python Version](https://img.shields.io/pypi/pyversions/junit2html) [![PyPI Downloads](https://static.pepy.tech/personalized-badge/junit2html?period=total&units=INTERNATIONAL_SYSTEM&left_color=GREY&right_color=MAGENTA&left_text=total+downloads)](https://pepy.tech/projects/junit2html) [![PyPI Downloads](https://static.pepy.tech/personalized-badge/junit2html?period=monthly&units=INTERNATIONAL_SYSTEM&left_color=GREY&right_color=BLUE&left_text=last+month+downloads)](https://pepy.tech/projects/junit2html)
+![PyPI - Version](https://img.shields.io/pypi/v/junit2report) ![License](https://img.shields.io/pypi/l/junit2report) ![Python Version](https://img.shields.io/pypi/pyversions/junit2report) [![PyPI Downloads](https://static.pepy.tech/personalized-badge/junit2report?period=total&units=INTERNATIONAL_SYSTEM&left_color=GREY&right_color=MAGENTA&left_text=total+downloads)](https://pepy.tech/projects/junit2report) [![PyPI Downloads](https://static.pepy.tech/personalized-badge/junit2report?period=monthly&units=INTERNATIONAL_SYSTEM&left_color=GREY&right_color=BLUE&left_text=last+month+downloads)](https://pepy.tech/projects/junit2report)
 
-**junit2html** is a lightweight, zero-dependency Python tool that converts JUnit XML test reports into human-readable, static HTML dashboards.
+**junit2report** is a lightweight, zero-dependency Python tool that converts JUnit XML test reports into human-readable, static HTML dashboards.
 
 Perfect for CI/CD pipelines, local debugging, or sharing test results with stakeholders.
 
@@ -19,7 +19,7 @@ Perfect for CI/CD pipelines, local debugging, or sharing test results with stake
 Install the package via pip:
 
 ```bash
-pip install junit2html
+pip install junit2report
 ```
 
 ## 🛠 Usage
@@ -27,27 +27,27 @@ pip install junit2html
 **Command Line Interface (CLI)**
 Basic conversion (uses default template):
 ```bash
-junit2html report.xml -o output.html
+junit2report report.xml -o output.html
 ```
 
 Using a specific template:
 ```bash
-junit2html report.xml -o output.html --template dark
+junit2report report.xml -o output.html --template dark
 ```
 
 Setting a custom title:
 ```bash
-junit2html report.xml -o output.html --template legacy --title "Nightly Run"
+junit2report report.xml -o output.html --template legacy --title "Nightly Run"
 ```
 
 List available templates:
 ```bash
-junit2html --list-templates
+junit2report --list-templates
 ```
 
 Generating analytics reports (in addition to the main report):
 ```bash
-junit2html report.xml -o output.html --allow-analytics
+junit2report report.xml -o output.html --allow-analytics
 ```
 This generates both `output.html` (main report) and `output-analytics.html` (analytics dashboard with charts and filters).
 
@@ -141,8 +141,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/gorkalertxundi/junit-html-report-generator.git
-   cd junit-html-report-generator
+  git clone https://github.com/gorkalertxundi/junit2report.git
+  cd junit2report
    ```
 
 2. **Install in editable mode**
@@ -153,11 +153,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 3. **Verify the installation**
    ```bash
-   # Check that the CLI is available
-  junit2html --list-templates
+  # Check that the CLI is available
+  junit2report --list-templates
    
    # Verify templates are bundled correctly
-   python -c "from junit2html import get_available_templates; print(get_available_templates())"
+   python -c "from junit2report import get_available_templates; print(get_available_templates())"
    ```
 
 ### Running Tests
@@ -181,17 +181,17 @@ All tests should pass before submitting a pull request.
 
 1. **Generate a test report**
    ```bash
-   # Use the provided sample file
-  junit2html sample-test-results.xml -o test-report.html
+  # Use the provided sample file
+  junit2report sample-test-results.xml -o test-report.html
    
-   # Try different templates
-  junit2html sample-test-results.xml -o dark-report.html --template dark
-  junit2html sample-test-results.xml -o minimal-report.html --template minimal
+  # Try different templates
+  junit2report sample-test-results.xml -o dark-report.html --template dark
+  junit2report sample-test-results.xml -o minimal-report.html --template minimal
    ```
 
 2. **Test the Python API**
    ```python
-   from junit2html import create_report
+   from junit2report import create_report
    
    # Test with file
    create_report(source="sample-test-results.xml", output="api-test.html")
@@ -207,19 +207,19 @@ All tests should pass before submitting a pull request.
    # Build the package
    python -m build
    
-   # Check that templates are included
-  tar -tzf dist/junit2html-*.tar.gz | grep templates
+  # Check that templates are included
+  tar -tzf dist/junit2report-*.tar.gz | grep templates
    ```
 
 ### Adding a New Template
 
-1. Create your template file in `junit2html/templates/yourtemplate.html`
+1. Create your template file in `junit2report/templates/yourtemplate.html`
 2. Use Jinja2 syntax with these variables:
    - `{{ summary.total }}`, `{{ summary.passed }}`, `{{ summary.failed }}`, etc.
    - `{{ summary.pass_rate }}` for the percentage
    - `{% for test in test_cases %}` to iterate through tests
    - `{{ test.name }}`, `{{ test.status }}`, `{{ test.message }}`, `{{ test.output }}`
-3. Test your template: `junit2html sample-test-results.xml --template yourtemplate`
+3. Test your template: `junit2report sample-test-results.xml --template yourtemplate`
 4. The template will automatically appear in `--list-templates`
 
 ### Contribution Workflow
